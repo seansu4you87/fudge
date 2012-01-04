@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+require 'lib/writer'
+require 'lib/class'
+require 'lib/function'
+require 'lib/variable'
+require 'lib/code_block'
+
+#fudge generate model ModelName:SuperClass type1:ivar1 type2:ivar2
+
+#./fudge generate model User NSString*:first_name,last_name,user_id BOOL:is_authenticated
+
+def createClass className, superClass, ivars, path
+  klass = Class.new className, superClass, ivars
+  
+  writer = Writer.new klass, path
+  writer.writeClass
+end
+
+command = ARGV[0]
+
+if (command == 'generate')
+  type = ARGV[1]
+  
+  path = Dir.pwd + "/" + type
+  
+  begin
+    Dir.mkdir path
+  rescue
+    
+  end
+
+  classInfo = ARGV[2].split ':'
+  className = classInfo[0]
+
+  superClass = classInfo[1]
+  superClass = 'NSObject' if superClass.nil?
+  
+  ivars = []
+  for i in (3..ARGV.size - 1)
+    varInfo = ARGV[i].split ':'
+    varType = varInfo[0]
+    varName = varInfo[1]
+    if varName.include? ','
+      names = varInfo[1].split ','
+      names.each {|name| ivars.push Variable.new varType, name}
+    else
+      ivars.push Variable.new varType, varName
+    end
+  end
+  
+  createClass className, superClass, ivars, path
+end
+

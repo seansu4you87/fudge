@@ -1,20 +1,21 @@
 class Writer
   attr_reader :fileName, :klass
   
-  def initialize klass
+  def initialize klass, path = './'
     @klass = klass
     @tabs = 0
+    @path = path
   end
   
   def switchToHeader
     @file.close unless @file == nil
-    @fileName = "#{@klass.name}.h"
+    @fileName = "#{@path}/#{@klass.name}.h"
     @file = File.open @fileName, 'w'
   end
   
   def switchToImplementation
     @file.close unless @file == nil
-    @fileName = "#{@klass.name}.m"
+    @fileName = "#{@path}/#{@klass.name}.m"
     @file = File.open @fileName, 'w'
   end
   
