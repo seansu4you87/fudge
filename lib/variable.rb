@@ -19,7 +19,7 @@ class Variable
   end
   
   def propertyString
-    if name.include? '*'
+    if type.include? '*'
       memoryType = 'retain'
     else
       memoryType = 'assign'
