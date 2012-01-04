@@ -1,34 +1,16 @@
 require 'lib/writer'
-require 'lib/h_writer'
-require 'lib/m_writer'
+require 'lib/class'
+require 'lib/function'
 require 'lib/variable'
+require 'lib/code_block'
 
 #fudge model ModelName<SuperClass ivar type1:ivar1, type2:ivar2
 
 def createModel(modelName, superClass, ivars)
-    header = HWriter.new modelName, superClass, ivars
-    header.writeReadMe
-    header.writeNewLine
-    header.writeImportFoundation
-    2.times {header.writeNewLine}
-    header.writeInterface
-    header.writeOpenBracket
-    header.writeIvars
-    header.writeCloseBracket
-    header.writeNewLine
-    header.writeProperties
-    
-    imp = MWriter.new modelName, superClass, ivars
-    imp.writeReadMe
-    imp.writeNewLine
-    imp.writeImportHeader
-    2.times {imp.writeNewLine}
-    imp.writeImplementation
-    imp.writeNewLine
-    imp.writeSynthesizes
-    #imp.writeFunction 'initWithFrame:andView:', 'id', ivars
-    imp.writeNewLine
-    imp.writeDealloc
+  klass = Class.new modelName, superClass, ivars
+  
+  writer = Writer.new klass
+  writer.writeClass
 end
 
 ivars = Array.new 

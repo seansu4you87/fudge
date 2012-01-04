@@ -1,11 +1,74 @@
 class Writer
-  attr_reader :file, :fileName, :className, :superClass, :ivars
+  attr_reader :fileName, :klass
   
-  def initialize className, superClass, ivars = nil
-    @className = className
-    @superClass = superClass
-    @ivars = ivars
+  def initialize klass
+    @klass = klass
     @tabs = 0
+  end
+  
+  def switchToHeader
+    @file.close unless @file == nil
+    @fileName = "#{@klass.name}.h"
+    @file = File.open @fileName, 'w'
+  end
+  
+  def switchToImplementation
+    @file.close unless @file == nil
+    @fileName = "#{@klass.name}.m"
+    @file = File.open @fileName, 'w'
+  end
+  
+  def writeClass
+    writeH
+    writeM
+  end
+  
+  def writeH
+    switchToHeader
+    
+    writeReadMe
+    writeNewLine
+    
+    writeImportFoundation
+    writeNewLine 2
+    
+    writeInterface
+    writeOpenBracket
+    writeIvars
+    writeCloseBracket
+    writeNewLine
+    
+    writeProperties
+    writeNewLine
+    
+    writeEnd
+    
+    @file.close
+    @file = nil
+  end
+  
+  def writeM
+    switchToImplementation
+    
+    writeReadMe
+    writeNewLine
+    
+    writeImportHeader
+    writeNewLine 2
+    
+    writeImplementation
+    writeNewLine
+    
+    writeSynthesizes
+    writeNewLine
+    
+    writeFunctions
+    writeNewLine
+    
+    writeEnd
+    
+    @file.close
+    @file = nil
   end
   
   def write string
@@ -24,8 +87,8 @@ class Writer
     write '}'
   end
   
-  def writeNewLine
-    write "\n"
+  def writeNewLine num = 1
+    num.times {write "\n"}
   end
   
   def writeReadMe
@@ -41,7 +104,7 @@ class Writer
   end
   
   def writeImportHeader
-    writeImport "#{@className}.h"
+    writeImport "#{@klass.name}.h"
   end
   
   def writeImportFoundation
@@ -49,92 +112,65 @@ class Writer
   end
   
   def writeInterface
-    write "@interface #{className} : #{superClass}"
+    write "@interface #{@klass.name} : #{@klass.parent}"
   end
   
   def writeImplementation
-    write "@implementation #{className}"
+    write "@implementation #{@klass.name}"
+  end
+  
+  def writeEnd
+    write "@end"
   end
   
   def writeIvars
-    ivars.each {|i| writeIvar i}
+    @klass.ivars.each {|i| writeIvar i}
   end
   
   def writeIvar ivar
-    write "#{ivar.type} #{ivar.name};"
+    write ivar.declareString
   end
   
   def writeProperties
-    ivars.each {|i| writeProperty i}
+    @klass.ivars.each {|i| writeProperty i}
   end
   
   def writeProperty ivar
-    if ivar.name.include? '*'
-      memoryType = 'retain'
-    else
-      memoryType = 'assign'
-    end
-    
-    write "@property(nonatomic, #{memoryType}) #{ivar.type} #{ivar.name};"
+    write ivar.propertyString
   end
   
   def writeSynthesizes
-    ivars.each {|i| writeSynthesize i}
+    @klass.ivars.each {|i| writeSynthesize i}
   end
   
   def writeSynthesize ivar
-    
-    write "@synthesize #{ivar.name};"
-  end
-  
-  def writeFunction funcName, returnType = 'void', params = nil
-    colonIndices = []
-    offset = 0
-    while index = funcName.index(':', offset)
-      colonIndices.push index + 1
-      offset = index + 1
-    end
-    
-    method = funcName
-    
-    colonIndices.each_index do |i|
-      var = params[i]
-      index = colonIndices[i]
-      
-      paramsString = "(#{var.type})#{var.name} "
-      method.insert(index, paramsString)
-      
-      colonIndices.each_index do 
-        |j| colonIndices[j] = colonIndices[j] + paramsString.length unless j == 0
-      end
-    end
-    
-    write "- (#{returnType})#{funcName}"
-    
-  end
-  
-  def writeDealloc
-    writeFunction 'dealloc'
-    writeOpenBracket
-    
-    @ivars.each do |ivar|
-      writeRelease ivar if ivar.type.include? '*'
-    end
-    
-    writeNewLine
-    write '[super dealloc];'
-    writeCloseBracket
+    write ivar.synthesizeString
   end
   
   def writeRelease ivar
     write "[#{ivar.name} release];"
   end
   
+  def writeFunctions
+    @klass.functions.each {|func| writeFunction func}
+  end
+  
+  def writeFunction func
+    write func.signatureString
+    writeOpenBracket
+    func.codeBlocks.each {|block| writeCodeBlock block}
+    writeCloseBracket
+  end
+  
+  def writeCodeBlock block
+    block.lines.each {|line| write line}
+  end
+  
   #Setters and Getters
   
   def readMe
 "//
-//  #{fileName}
+//  #{@fileName}
 //  {Project}
 //
 //  Created by {Fudge} on {Date}
