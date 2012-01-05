@@ -6,6 +6,10 @@ class Variable
     @name = name
   end
   
+  def score
+    0
+  end
+  
   def releaseString
     "[#{name} release];"
   end

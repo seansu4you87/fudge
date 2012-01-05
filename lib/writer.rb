@@ -30,6 +30,8 @@ class Writer
     writeReadMe
     writeNewLine
     
+    
+    
     writeImportFoundation
     writeNewLine 2
     
