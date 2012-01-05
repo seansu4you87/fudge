@@ -30,9 +30,14 @@ class Writer
     writeReadMe
     writeNewLine
     
-    
-    
-    writeImportFoundation
+    if @klass.parent.includes? 'NS'
+      writeImportFoundation
+    else if @klass.parent.includes? 'UI'
+      writeImportUIKit
+    else
+      writeImportParent
+    end
+      
     writeNewLine 2
     
     writeInterface
@@ -112,6 +117,14 @@ class Writer
   
   def writeImportFoundation
     writeImportLibrary 'Foundation'
+  end
+  
+  def writeImportUIKit
+    writeImportLibrary 'UIKit'
+  end
+  
+  def writeImportParent
+    writeImport "#{@klass.parent}.h"
   end
   
   def writeInterface
