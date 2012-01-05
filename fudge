@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'lib/writer'
-require 'lib/class'
-require 'lib/function'
-require 'lib/variable'
-require 'lib/code_block'
+require File.dirname(__FILE__) + '/lib/writer'
+require File.dirname(__FILE__) + '/lib/class'
+require File.dirname(__FILE__) + '/lib/function'
+require File.dirname(__FILE__) + '/lib/variable'
+require File.dirname(__FILE__) + '/lib/code_block'
 
 #fudge generate model ModelName:SuperClass type1:ivar1 type2:ivar2
 
